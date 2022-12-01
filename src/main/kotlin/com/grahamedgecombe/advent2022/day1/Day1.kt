@@ -30,4 +30,11 @@ object Day1 : Puzzle<List<Day1.Elf>>(1) {
     override fun solvePart1(input: List<Elf>): Int {
         return input.maxOf(Elf::total)
     }
+
+    override fun solvePart2(input: List<Elf>): Int {
+        return input.map(Elf::total)
+            .sortedDescending()
+            .slice(0 until 3)
+            .sum()
+    }
 }
