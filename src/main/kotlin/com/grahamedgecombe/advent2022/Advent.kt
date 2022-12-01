@@ -1,12 +1,15 @@
 package com.grahamedgecombe.advent2022
 
+import com.grahamedgecombe.advent2022.day1.Day1
 import kotlin.time.Duration
 import kotlin.time.ExperimentalTime
 import kotlin.time.measureTimedValue
 
 @ExperimentalTime
 fun main() {
-    val puzzles = listOf<Puzzle<*>>()
+    val puzzles = listOf<Puzzle<*>>(
+        Day1,
+    )
 
     for (puzzle in puzzles) {
         solve(puzzle)
