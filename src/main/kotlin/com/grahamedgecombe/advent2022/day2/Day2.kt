@@ -14,6 +14,10 @@ object Day2 : Puzzle<List<Pair<Char, Char>>>(2) {
         return input.sumOf(Day2::playPart1)
     }
 
+    override fun solvePart2(input: List<Pair<Char, Char>>): Int {
+        return input.sumOf(Day2::playPart2)
+    }
+
     private fun playPart1(round: Pair<Char, Char>): Int {
         val (opponentChar, playerChar) = round
 
@@ -29,6 +33,21 @@ object Day2 : Puzzle<List<Pair<Char, Char>>>(2) {
             (opponent + 1) % 3 -> score + 6
             // opponent wins
             else -> score
+        }
+    }
+
+    private fun playPart2(round: Pair<Char, Char>): Int {
+        val (opponentChar, playerChar) = round
+
+        val opponent = opponentChar.code - 'A'.code
+
+        return when (playerChar) {
+            // opponent wins
+            'X' -> ((opponent + 2) % 3) + 1
+            // draw
+            'Y' -> opponent + 4
+            // player wins
+            else -> ((opponent + 1) % 3) + 7
         }
     }
 }
