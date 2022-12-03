@@ -5,6 +5,7 @@ import com.grahamedgecombe.advent2022.Puzzle
 object Day3 : Puzzle<List<Day3.Rucksack>>(3) {
     data class Rucksack(val left: Set<Char>, val right: Set<Char>) {
         val intersection = left intersect right
+        val union = left union right
 
         companion object {
             fun parse(line: String): Rucksack {
@@ -32,5 +33,11 @@ object Day3 : Puzzle<List<Day3.Rucksack>>(3) {
     override fun solvePart1(input: List<Rucksack>): Int {
         return input.flatMap(Rucksack::intersection)
             .sumOf { it.priority }
+    }
+
+    override fun solvePart2(input: List<Rucksack>): Int {
+        return input.map(Rucksack::union)
+            .windowed(3, 3)
+            .sumOf { group -> group.reduce(Set<Char>::intersect).single().priority }
     }
 }
