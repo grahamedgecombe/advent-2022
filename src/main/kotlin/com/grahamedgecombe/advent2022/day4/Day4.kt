@@ -22,9 +22,19 @@ object Day4 : Puzzle<List<Pair<IntRange, IntRange>>>(4) {
         return o.first >= first && o.last <= last
     }
 
+    private fun IntRange.overlaps(o: IntRange): Boolean {
+        return o.first in this || o.last in this
+    }
+
     override fun solvePart1(input: List<Pair<IntRange, IntRange>>): Int {
         return input.count { (first, second) ->
             first.containsAll(second) || second.containsAll(first)
+        }
+    }
+
+    override fun solvePart2(input: List<Pair<IntRange, IntRange>>): Int {
+        return input.count { (first, second) ->
+            first.overlaps(second) || second.overlaps(first)
         }
     }
 }
