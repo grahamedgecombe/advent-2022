@@ -69,4 +69,24 @@ object Day5 : Puzzle<Day5.Input>(5) {
 
         return stacks.map(ArrayDeque<Char>::last).joinToString(separator = "")
     }
+
+    override fun solvePart2(input: Input): Any {
+        val stacks = input.stacks.map(::ArrayDeque)
+        val mover = ArrayDeque<Char>()
+
+        for (move in input.moves) {
+            val from = stacks[move.from - 1]
+            val to = stacks[move.to - 1]
+
+            for (i in 0 until move.n) {
+                mover.addLast(from.removeLast())
+            }
+
+            while (mover.isNotEmpty()) {
+                to.addLast(mover.removeLast())
+            }
+        }
+
+        return stacks.map(ArrayDeque<Char>::last).joinToString(separator = "")
+    }
 }
