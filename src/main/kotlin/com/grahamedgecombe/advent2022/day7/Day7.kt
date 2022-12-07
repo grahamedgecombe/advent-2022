@@ -29,6 +29,9 @@ object Day7 : Puzzle<Day7.Node>(7) {
 
     private const val MAX_TOTAL_SIZE = 100000
 
+    private const val CAPACITY = 70000000
+    private const val REQUIRED_SPACE = 30000000
+
     override fun parse(input: Sequence<String>): Node {
         val root = Node.Directory(parent = null)
         var current = root
@@ -72,5 +75,22 @@ object Day7 : Puzzle<Day7.Node>(7) {
         }
 
         return sum
+    }
+
+    override fun solvePart2(input: Node): Int {
+        val used = input.walk { _, _ ->  }
+
+        val free = CAPACITY - used
+        val remainingRequiredSpace = REQUIRED_SPACE - free
+
+        var deleteSize = used // worst case we delete everything
+
+        input.walk { node, size ->
+            if (node is Node.Directory && size >= remainingRequiredSpace) {
+                deleteSize = minOf(deleteSize, size)
+            }
+        }
+
+        return deleteSize
     }
 }
