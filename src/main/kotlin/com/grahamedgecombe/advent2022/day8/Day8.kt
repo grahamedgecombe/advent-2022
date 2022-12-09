@@ -2,6 +2,7 @@ package com.grahamedgecombe.advent2022.day8
 
 import com.grahamedgecombe.advent2022.Puzzle
 import java.util.*
+import kotlin.math.abs
 
 object Day8 : Puzzle<Day8.Grid>(8) {
     class Grid private constructor(
@@ -58,6 +59,60 @@ object Day8 : Puzzle<Day8.Grid>(8) {
             }
         }
 
+        fun maxScore(): Int {
+            var max = 0
+
+            for (x in 0 until width) {
+                for (y in 0 until height) {
+                    max = maxOf(max, score(x, y))
+                }
+            }
+
+            return max
+        }
+
+        private fun score(x: Int, y: Int): Int {
+            val treehouse = get(x, y)
+
+            val up = verticalViewingDistance(treehouse, x, y - 1 downTo 0)
+            val down = verticalViewingDistance(treehouse, x, y + 1 until height)
+
+            val left = horizontalViewingDistance(treehouse, x - 1 downTo 0, y)
+            val right = horizontalViewingDistance(treehouse, x + 1 until width, y)
+
+            return up * down * left * right
+        }
+
+        private fun horizontalViewingDistance(treehouse: Int, xs: IntProgression, y: Int): Int {
+            if (xs.isEmpty()) {
+                return 0
+            }
+
+            for (x in xs) {
+                val tree = get(x, y)
+                if (tree >= treehouse) {
+                    return abs(x - xs.first) + 1
+                }
+            }
+
+            return abs(xs.last - xs.first) + 1
+        }
+
+        private fun verticalViewingDistance(treehouse: Int, x: Int, ys: IntProgression): Int {
+            if (ys.isEmpty()) {
+                return 0
+            }
+
+            for (y in ys) {
+                val tree = get(x, y)
+                if (tree >= treehouse) {
+                    return abs(y - ys.first) + 1
+                }
+            }
+
+            return abs(ys.last - ys.first) + 1
+        }
+
         companion object {
             fun parse(input: List<String>): Grid {
                 require(input.isNotEmpty())
@@ -88,5 +143,9 @@ object Day8 : Puzzle<Day8.Grid>(8) {
 
     override fun solvePart1(input: Grid): Int {
         return input.countVisible()
+    }
+
+    override fun solvePart2(input: Grid): Int {
+        return input.maxScore()
     }
 }
