@@ -67,4 +67,23 @@ object Day10 : Puzzle<List<Day10.Insn>>(10) {
 
         return sum
     }
+
+    override fun solvePart2(input: List<Insn>): String {
+        val s = StringBuilder()
+
+        Vm(input) { cycle, x ->
+            val position = (cycle - 1) % 40
+            if (position in (x - 1)..(x + 1)) {
+                s.append('#')
+            } else {
+                s.append('.')
+            }
+
+            if (position == 39) {
+                s.append('\n')
+            }
+        }.run()
+
+        return s.trimEnd('\n').toString()
+    }
 }
