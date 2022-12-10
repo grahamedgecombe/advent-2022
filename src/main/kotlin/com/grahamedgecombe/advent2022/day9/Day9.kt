@@ -45,40 +45,64 @@ object Day9 : Puzzle<List<Day9.Motion>>(9) {
     }
 
     override fun solvePart1(input: List<Motion>): Int {
-        var head = Vector2.ZERO
-        var tail = Vector2.ZERO
+        return solve(input, 2)
+    }
 
-        val visited = mutableSetOf(tail)
+    override fun solvePart2(input: List<Motion>): Int {
+        return solve(input, 10)
+    }
 
-        for (motion in input) {
-            head = motion.translate(head)
+    private fun solve(motions: List<Motion>, len: Int): Int {
+        require(len >= 1)
 
-            while (true) {
-                val dx = head.x - tail.x
-                val dy = head.y - tail.y
+        val rope = Array(len) { Vector2.ZERO }
+        val visited = mutableSetOf(rope.last())
 
-                if (dx == 0) {
-                    if (dy < -1 || dy > 1) {
-                        tail = tail.add(0, dy.sign)
+        for (motion in motions) {
+            rope[0] = motion.translate(rope[0])
+
+            do {
+                var changed = false
+
+                for (i in 0 until rope.size - 1) {
+                    val a = rope[i]
+                    val b = rope[i + 1]
+
+                    val next = follow(a, b)
+
+                    if (b != next) {
+                        rope[i + 1] = next
+                        changed = true
+
+                        if (i + 1 == rope.size - 1) {
+                            visited += next
+                        }
                     } else {
                         break
                     }
-                } else if (dy == 0) {
-                    if (dx < -1 || dx > 1) {
-                        tail = tail.add(dx.sign, 0)
-                    } else {
-                        break
-                    }
-                } else if (abs(dx) <= 1 && abs(dy) <= 1) {
-                    break
-                } else {
-                    tail = tail.add(dx.sign, dy.sign)
                 }
-
-                visited += tail
-            }
+            } while (changed)
         }
 
         return visited.size
+    }
+
+    private fun follow(a: Vector2, b: Vector2): Vector2 {
+        val dx = a.x - b.x
+        val dy = a.y - b.y
+
+        if (dx == 0) {
+            if (dy < -1 || dy > 1) {
+                return b.add(0, dy.sign)
+            }
+        } else if (dy == 0) {
+            if (dx < -1 || dx > 1) {
+                return b.add(dx.sign, 0)
+            }
+        } else if (abs(dx) > 1 || abs(dy) > 1) {
+            return b.add(dx.sign, dy.sign)
+        }
+
+        return b
     }
 }
