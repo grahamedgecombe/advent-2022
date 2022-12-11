@@ -41,10 +41,10 @@ object Day11 : Puzzle<List<Day11.Monkey>>(11) {
         val trueMonkey: Int,
         val falseMonkey: Int
     ) {
-        fun inspect(worry: Int): Int {
+        fun inspect(worry: Long): Long {
             val operand = when (rightOperand) {
                 is Operand.Old -> worry
-                is Operand.Constant -> rightOperand.n
+                is Operand.Constant -> rightOperand.n.toLong()
             }
 
             return when (operator) {
@@ -105,8 +105,8 @@ object Day11 : Puzzle<List<Day11.Monkey>>(11) {
     }
 
     class State(val monkey: Monkey) {
-        val items = monkey.items.toMutableList()
-        var inspections = 0
+        val items = monkey.items.map(Int::toLong).toMutableList()
+        var inspections = 0L
     }
 
     override fun parse(input: Sequence<String>): List<Monkey> {
@@ -127,17 +127,26 @@ object Day11 : Puzzle<List<Day11.Monkey>>(11) {
         return monkeys
     }
 
-    override fun solvePart1(input: List<Monkey>): Int {
-        val states = input.map(::State)
+    override fun solvePart1(input: List<Monkey>): Long {
+        return solve(input, 20, 3)
+    }
 
-        for (round in 0 until 20) {
+    override fun solvePart2(input: List<Monkey>): Long {
+        return solve(input, 10000, 1)
+    }
+
+    private fun solve(input: List<Monkey>, rounds: Int, divisor: Int): Long {
+        val states = input.map(::State)
+        val modulus = input.map(Monkey::divisor).reduce(Int::times)
+
+        for (round in 0 until rounds) {
             for (state in states) {
                 val monkey = state.monkey
 
                 for (item in state.items) {
-                    val worry = monkey.inspect(item) / 3
+                    val worry = (monkey.inspect(item) / divisor) % modulus
 
-                    if ((worry % monkey.divisor) == 0) {
+                    if ((worry % monkey.divisor) == 0L) {
                         states[monkey.trueMonkey].items += worry
                     } else {
                         states[monkey.falseMonkey].items += worry
@@ -152,6 +161,6 @@ object Day11 : Puzzle<List<Day11.Monkey>>(11) {
         return states.map(State::inspections)
             .sortedDescending()
             .take(2)
-            .reduce(Int::times)
+            .reduce(Long::times)
     }
 }
