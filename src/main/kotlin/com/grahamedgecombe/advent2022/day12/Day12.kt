@@ -2,20 +2,24 @@ package com.grahamedgecombe.advent2022.day12
 
 import com.grahamedgecombe.advent2022.Puzzle
 import com.grahamedgecombe.advent2022.util.AStar
+import com.grahamedgecombe.advent2022.util.Bfs
 import com.grahamedgecombe.advent2022.util.Vector2
 import kotlin.math.abs
 
 object Day12 : Puzzle<Day12.Grid>(12) {
     class Grid private constructor(
         private val heights: CharArray,
-        val width: Int,
-        val height: Int,
+        private val width: Int,
+        private val height: Int,
         val start: Vector2,
         val end: Vector2
     ) {
+        operator fun contains(v: Vector2): Boolean {
+            return v.x in 0 until width && v.y in 0 until height
+        }
+
         operator fun get(v: Vector2): Char {
-            require(v.x in 0 until width)
-            require(v.y in 0 until height)
+            require(v in this)
 
             return heights[v.y * width + v.x]
         }
@@ -58,38 +62,41 @@ object Day12 : Puzzle<Day12.Grid>(12) {
         }
     }
 
-    data class Node(val grid: Grid, val position: Vector2) : AStar.Node<Node> {
+    val Vector2.neighbours: Sequence<Vector2>
+        get() = sequence {
+            for (dy in -1..1) {
+                for (dx in -1..1) {
+                    if (dx == 0 && dy == 0) {
+                        continue
+                    } else if (dx != 0 && dy != 0) {
+                        continue
+                    }
+
+                    yield(Vector2(x + dx, y + dy))
+                }
+            }
+        }
+
+    data class NodePart1(val grid: Grid, val position: Vector2) : AStar.Node<NodePart1> {
         override val isGoal: Boolean
             get() = position == grid.end
 
-        override val neighbours: Sequence<AStar.Neighbour<Node>>
+        override val neighbours: Sequence<AStar.Neighbour<NodePart1>>
             get() = sequence {
                 val current = grid[position]
-
-                for (dy in -1..1) {
-                    for (dx in -1..1) {
-                        if (dx == 0 && dy == 0) {
-                            continue
-                        } else if (dx != 0 && dy != 0) {
-                            continue
-                        }
-
-                        val nextPosition = position.add(dx, dy)
-                        if (nextPosition.x !in 0 until grid.width) {
-                            continue
-                        } else if (nextPosition.y !in 0 until grid.height) {
-                            continue
-                        }
-
-                        val next = grid[nextPosition]
-
-                        val diff = next.code - current.code
-                        if (diff > 1) {
-                            continue
-                        }
-
-                        yield(AStar.Neighbour(Node(grid, nextPosition), 1))
+                for (nextPosition in position.neighbours) {
+                    if (nextPosition !in grid) {
+                        continue
                     }
+
+                    val next = grid[nextPosition]
+
+                    val diff = next.code - current.code
+                    if (diff > 1) {
+                        continue
+                    }
+
+                    yield(AStar.Neighbour(NodePart1(grid, nextPosition), 1))
                 }
             }
 
@@ -97,11 +104,40 @@ object Day12 : Puzzle<Day12.Grid>(12) {
             get() = abs(position.x - grid.end.x) + abs(position.y - grid.end.y)
     }
 
+    data class NodePart2(val grid: Grid, val position: Vector2) : Bfs.Node<NodePart2> {
+        override val isGoal: Boolean
+            get() = grid[position] == 'a'
+
+        override val neighbours: Sequence<NodePart2>
+            get() = sequence {
+                val current = grid[position]
+
+                for (prevPosition in position.neighbours) {
+                    if (prevPosition !in grid) {
+                        continue
+                    }
+
+                    val prev = grid[prevPosition]
+
+                    val diff = current.code - prev.code
+                    if (diff > 1) {
+                        continue
+                    }
+
+                    yield(NodePart2(grid, prevPosition))
+                }
+            }
+    }
+
     override fun parse(input: Sequence<String>): Grid {
         return Grid.parse(input.toList())
     }
 
     override fun solvePart1(input: Grid): Int {
-        return AStar.search(Node(input, input.start)).first().distance
+        return AStar.search(NodePart1(input, input.start)).first().distance
+    }
+
+    override fun solvePart2(input: Grid): Int {
+        return Bfs.search(NodePart2(input, input.end)).minOf { it.size - 1 }
     }
 }
