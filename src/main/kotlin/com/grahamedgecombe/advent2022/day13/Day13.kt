@@ -127,4 +127,16 @@ object Day13 : Puzzle<List<Pair<Day13.Packet, Day13.Packet>>>(13) {
 
         return sum
     }
+
+    override fun solvePart2(input: List<Pair<Packet, Packet>>): Int {
+        val divider1 = Packet.parse("[[2]]")
+        val divider2 = Packet.parse("[[6]]")
+
+        val sorted = input.flatMap { (left, right) -> sequenceOf(left, right) }
+            .plus(divider1)
+            .plus(divider2)
+            .sorted()
+
+        return (sorted.indexOf(divider1) + 1) * (sorted.indexOf(divider2) + 1)
+    }
 }
