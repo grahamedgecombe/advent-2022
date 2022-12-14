@@ -26,24 +26,21 @@ object Day14 : Puzzle<List<Day14.Path>>(14) {
     }
 
     class Grid private constructor(
-        val width: Int,
-        val height: Int
+        val maxY: Int,
+        private val floor: Boolean
     ) {
-        private val tiles = Array(width * height) { Tile.AIR }
+        private val tiles = mutableMapOf<Vector2, Tile>()
 
         operator fun get(x: Int, y: Int): Tile {
-            return if (x !in 0 until width) {
-                Tile.AIR
-            } else if (y !in 0 until height) {
-                Tile.AIR
-            } else {
-                tiles[y * width + x]
+            if (floor && y == (maxY + 2)) {
+                return Tile.ROCK
             }
+
+            return tiles[Vector2(x, y)] ?: Tile.AIR
         }
 
         operator fun set(x: Int, y: Int, tile: Tile) {
-            require(x in 0 until width && y in 0 until height)
-            tiles[y * width + x] = tile
+            tiles[Vector2(x, y)] = tile
         }
 
         private fun setLine(src: Vector2, dest: Vector2, tile: Tile) {
@@ -71,11 +68,9 @@ object Day14 : Puzzle<List<Day14.Path>>(14) {
         }
 
         companion object {
-            fun create(paths: List<Path>): Grid {
-                val width = paths.maxOf { path -> path.points.maxOf(Vector2::x) } + 1
-                val height = paths.maxOf { path -> path.points.maxOf(Vector2::y) } + 1
-
-                val grid = Grid(width, height)
+            fun create(paths: List<Path>, floor: Boolean): Grid {
+                val maxY = paths.maxOf { path -> path.points.maxOf(Vector2::y) }
+                val grid = Grid(maxY, floor)
 
                 for (path in paths) {
                     for (pair in path.points.zipWithNext()) {
@@ -92,16 +87,20 @@ object Day14 : Puzzle<List<Day14.Path>>(14) {
         return input.map(Path::parse).toList()
     }
 
-    override fun solvePart1(input: List<Path>): Int {
-        val grid = Grid.create(input)
+    private fun solve(input: List<Path>, floor: Boolean): Int {
+        val grid = Grid.create(input, floor)
         var units = 0
 
         outer@while (true) {
             var x = 500
             var y = 0
 
+            if (floor && grid[x, y] == Tile.SAND) {
+                break
+            }
+
             while (true) {
-                if (y >= grid.height) {
+                if (!floor && y > grid.maxY) {
                     break@outer
                 } else if (grid[x, y + 1] == Tile.AIR) {
                     y++
@@ -120,5 +119,13 @@ object Day14 : Puzzle<List<Day14.Path>>(14) {
         }
 
         return units
+    }
+
+    override fun solvePart1(input: List<Path>): Int {
+        return solve(input, floor = false)
+    }
+
+    override fun solvePart2(input: List<Path>): Int {
+        return solve(input, floor = true)
     }
 }
