@@ -10,6 +10,12 @@ class Day15Test {
         assertEquals(5100463, Day15.solvePart1(PROD_INPUT))
     }
 
+    @Test
+    fun testPart2() {
+        assertEquals(56000011, Day15.solve(TEST_INPUT, 20))
+        assertEquals(11557863040754, Day15.solvePart2(PROD_INPUT))
+    }
+
     private companion object {
         private val TEST_INPUT = Day15.parse("""
             Sensor at x=2, y=18: closest beacon is at x=-2, y=15

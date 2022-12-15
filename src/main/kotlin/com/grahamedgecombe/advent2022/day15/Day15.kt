@@ -3,8 +3,10 @@ package com.grahamedgecombe.advent2022.day15
 import com.google.common.collect.ContiguousSet
 import com.google.common.collect.DiscreteDomain
 import com.google.common.collect.Range
+import com.google.common.collect.RangeSet
 import com.google.common.collect.TreeRangeSet
 import com.grahamedgecombe.advent2022.Puzzle
+import com.grahamedgecombe.advent2022.UnsolvableException
 import com.grahamedgecombe.advent2022.util.Vector2
 import kotlin.math.abs
 
@@ -25,7 +27,7 @@ object Day15 : Puzzle<List<Day15.Sensor>>(15) {
         return input.map(Sensor::parse).toList()
     }
 
-    fun solveRow(sensors: List<Sensor>, y: Int): Int {
+    private fun getInvalidXs(sensors: List<Sensor>, y: Int): RangeSet<Int> {
         val xs = TreeRangeSet.create<Int>()
 
         for (sensor in sensors) {
@@ -45,13 +47,42 @@ object Day15 : Puzzle<List<Day15.Sensor>>(15) {
             }
         }
 
-        return xs.asRanges().sumOf { range ->
+        return xs
+    }
+
+    fun solveRow(sensors: List<Sensor>, y: Int): Int {
+        return getInvalidXs(sensors, y).asRanges().sumOf { range ->
             val set = ContiguousSet.create(range, DiscreteDomain.integers())
             set.last() - set.first() + 1
         }
     }
 
+    fun solve(sensors: List<Sensor>, max: Int): Long {
+        val knownBeacons = sensors.map(Sensor::beacon).toSet()
+        val bounds = Range.closed(0, max)
+
+        for (y in 0..max) {
+            val validXs = getInvalidXs(sensors, y)
+                .complement()
+                .subRangeSet(bounds)
+
+            val range = validXs.asRanges().singleOrNull() ?: continue
+            val set = ContiguousSet.create(range, DiscreteDomain.integers())
+
+            val x = set.first()
+            if (x == set.last() && !knownBeacons.contains(Vector2(x, y))) {
+                return x.toLong() * 4000000 + y
+            }
+        }
+
+        throw UnsolvableException()
+    }
+
     override fun solvePart1(input: List<Sensor>): Int {
         return solveRow(input, 2000000)
+    }
+
+    override fun solvePart2(input: List<Sensor>): Long {
+        return solve(input, 4000000)
     }
 }
