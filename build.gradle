@@ -8,6 +8,8 @@ repositories {
 }
 
 dependencies {
+    implementation('com.google.guava:guava:31.1-jre')
+
     testImplementation('org.jetbrains.kotlin:kotlin-test-junit5:1.7.22')
 }
 
