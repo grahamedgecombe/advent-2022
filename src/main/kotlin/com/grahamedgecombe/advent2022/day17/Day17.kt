@@ -57,6 +57,8 @@ object Day17 : Puzzle<String>(17) {
         }
     }
 
+    data class Key(val shapeIndex: Int, val patternIndex: Int, val rows: List<Int>)
+
     class Tower(private val pattern: String) {
         private val rows = mutableListOf<Int>()
         private var shapeIndex = 0
@@ -64,6 +66,25 @@ object Day17 : Puzzle<String>(17) {
 
         val height
             get() = rows.size
+
+        fun key(): Key {
+            val unblockedRows = mutableListOf<Int>()
+
+            var y = rows.size - 1
+            var blocked = 0
+            while (blocked != (1 shl WIDTH) - 1) {
+                if (y < 0) {
+                    unblockedRows += (1 shl WIDTH) - 1
+                    break
+                }
+
+                blocked = blocked or rows[y]
+                unblockedRows += rows[y]
+                y--
+            }
+
+            return Key(shapeIndex % SHAPES.size, patternIndex % pattern.length, unblockedRows)
+        }
 
         fun fall() {
             val shape = SHAPES[shapeIndex++ % SHAPES.size]
@@ -123,11 +144,45 @@ object Day17 : Puzzle<String>(17) {
         return input.single()
     }
 
-    override fun solvePart1(input: String): Int {
+    private fun solve(input: String, rocks: Long): Long {
         val tower = Tower(input)
-        for (i in 0 until 2022) {
+        val history = mutableMapOf<Key, Pair<Long, Long>>()
+
+        var i = 0L
+        while (i < rocks) {
+            val k = tower.key()
+
+            val v = history[k]
+            if (v != null) {
+                val (j, h) = v
+
+                val loops = (rocks - i) / (i - j)
+                val extraHeight = loops * (tower.height - h)
+
+                i += loops * (i - j)
+
+                while (i < rocks) {
+                    tower.fall()
+                    i++
+                }
+
+                return tower.height + extraHeight
+            }
+
+            history[k] = Pair(i, tower.height.toLong())
+
             tower.fall()
+            i++
         }
-        return tower.height
+
+        return tower.height.toLong()
+    }
+
+    override fun solvePart1(input: String): Long {
+        return solve(input, 2022)
+    }
+
+    override fun solvePart2(input: String): Long {
+        return solve(input, 1000000000000)
     }
 }
