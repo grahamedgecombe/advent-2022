@@ -8,6 +8,7 @@ import com.grahamedgecombe.advent2022.day13.Day13
 import com.grahamedgecombe.advent2022.day14.Day14
 import com.grahamedgecombe.advent2022.day15.Day15
 import com.grahamedgecombe.advent2022.day16.Day16
+import com.grahamedgecombe.advent2022.day17.Day17
 import com.grahamedgecombe.advent2022.day2.Day2
 import com.grahamedgecombe.advent2022.day3.Day3
 import com.grahamedgecombe.advent2022.day4.Day4
@@ -39,6 +40,7 @@ fun main() {
         Day14,
         Day15,
         Day16,
+        Day17,
     )
 
     for (puzzle in puzzles) {
