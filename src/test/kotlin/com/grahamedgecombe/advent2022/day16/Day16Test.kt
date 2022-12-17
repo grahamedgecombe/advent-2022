@@ -10,6 +10,12 @@ class Day16Test {
         assertEquals(1653, Day16.solvePart1(PROD_INPUT))
     }
 
+    @Test
+    fun testPart2() {
+        assertEquals(1707, Day16.solvePart2(TEST_INPUT))
+        assertEquals(2223, Day16.solvePart2(PROD_INPUT))
+    }
+
     private companion object {
         private val TEST_INPUT = Day16.parse("""
             Valve AA has flow rate=0; tunnels lead to valves DD, II, BB

@@ -75,7 +75,48 @@ object Day16 : Puzzle<Day16.Graph>(16) {
         return max
     }
 
+    private fun maxPressureByOpenSet(
+        graph: Graph,
+        position: String,
+        time: Int,
+        open: Set<String>,
+        pressure: Int,
+        pressures: MutableMap<Set<String>, Int>
+    ) {
+        pressures.merge(open, pressure, ::maxOf)
+
+        for ((k, v) in graph.usefulValves) {
+            if (k == position || k in open) {
+                continue
+            }
+
+            val t = time - (graph.distances[Pair(position, k)]!! + 1)
+            if (t <= 0) {
+                continue
+            }
+
+            maxPressureByOpenSet(graph, k, t, open + k, pressure + t * v.rate, pressures)
+        }
+    }
+
     override fun solvePart1(input: Graph): Int {
         return maxPressure(input, "AA", 30, emptySet(), 0)
+    }
+
+    override fun solvePart2(input: Graph): Int {
+        val pressures = mutableMapOf<Set<String>, Int>()
+        maxPressureByOpenSet(input, "AA", 26, emptySet(), 0, pressures)
+
+        var max = 0
+
+        for ((open1, pressure1) in pressures) {
+            for ((open2, pressure2) in pressures) {
+                if ((open1 intersect open2).isEmpty()) {
+                    max = maxOf(max, pressure1 + pressure2)
+                }
+            }
+        }
+
+        return max
     }
 }
