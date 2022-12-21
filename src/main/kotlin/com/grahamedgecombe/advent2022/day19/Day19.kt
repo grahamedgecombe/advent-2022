@@ -107,4 +107,8 @@ object Day19 : Puzzle<List<Day19.Blueprint>>(19) {
     override fun solvePart1(input: List<Blueprint>): Int {
         return input.sumOf { blueprint -> blueprint.id * maxGeodes(blueprint, 24) }
     }
+
+    override fun solvePart2(input: List<Blueprint>): Int {
+        return input.take(3).map { maxGeodes(it, 32) }.reduce(Int::times)
+    }
 }

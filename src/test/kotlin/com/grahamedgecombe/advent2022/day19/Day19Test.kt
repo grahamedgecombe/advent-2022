@@ -10,6 +10,11 @@ class Day19Test {
         assertEquals(1092, Day19.solvePart1(PROD_INPUT))
     }
 
+    @Test
+    fun testPart2() {
+        assertEquals(3542, Day19.solvePart2(PROD_INPUT))
+    }
+
     private companion object {
         private val TEST_INPUT = Day19.parse("""
             Blueprint 1: Each ore robot costs 4 ore. Each clay robot costs 2 ore. Each obsidian robot costs 3 ore and 14 clay. Each geode robot costs 2 ore and 7 obsidian.
