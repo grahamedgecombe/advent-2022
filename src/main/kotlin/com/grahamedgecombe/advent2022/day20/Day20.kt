@@ -3,11 +3,11 @@ package com.grahamedgecombe.advent2022.day20
 import com.grahamedgecombe.advent2022.Puzzle
 
 object Day20 : Puzzle<List<Int>>(20) {
-    class Node(val n: Int) {
+    class Node(val n: Long) {
         lateinit var prev: Node
         lateinit var next: Node
 
-        fun mix() {
+        fun mix(size: Int) {
             var position = prev
 
             // unlink
@@ -15,12 +15,13 @@ object Day20 : Puzzle<List<Int>>(20) {
             next.prev = prev
 
             // find position to insert at
-            if (n > 0) {
-                for (i in 0 until n) {
+            val decrypted = n % (size - 1)
+            if (decrypted > 0) {
+                for (i in 0 until decrypted) {
                     position = position.next
                 }
-            } else if (n < 0) {
-                for (i in 0 until -n) {
+            } else if (decrypted < 0) {
+                for (i in 0 until -decrypted) {
                     position = position.prev
                 }
             }
@@ -35,17 +36,19 @@ object Day20 : Puzzle<List<Int>>(20) {
     }
 
     class Ring private constructor(private val nodes: List<Node>) {
-        fun mix(): Int {
-            for (node in nodes) {
-                node.mix()
+        fun mix(n: Int): Long {
+            for (i in 0 until n) {
+                for (node in nodes) {
+                    node.mix(nodes.size)
+                }
             }
 
             var current = nodes.first()
-            while (current.n != 0) {
+            while (current.n != 0L) {
                 current = current.next
             }
 
-            var sum = 0
+            var sum = 0L
 
             for (i in 0 until 3) {
                 for (j in 0 until 1000) {
@@ -59,13 +62,13 @@ object Day20 : Puzzle<List<Int>>(20) {
         }
 
         companion object {
-            fun create(input: List<Int>): Ring {
+            fun create(input: List<Int>, key: Int): Ring {
                 require(input.isNotEmpty())
 
                 val nodes = mutableListOf<Node>()
 
                 for (n in input) {
-                    nodes += Node(n)
+                    nodes += Node(n.toLong() * key)
                 }
 
                 for ((i, node) in nodes.withIndex()) {
@@ -82,7 +85,11 @@ object Day20 : Puzzle<List<Int>>(20) {
         return input.map(String::toInt).toList()
     }
 
-    override fun solvePart1(input: List<Int>): Int {
-        return Ring.create(input).mix()
+    override fun solvePart1(input: List<Int>): Long {
+        return Ring.create(input, 1).mix(1)
+    }
+
+    override fun solvePart2(input: List<Int>): Long {
+        return Ring.create(input, 811589153).mix(10)
     }
 }
