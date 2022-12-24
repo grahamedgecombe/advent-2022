@@ -27,16 +27,20 @@ object Day24 : Puzzle<Day24.Input>(24) {
     }
 
     data class Blizzard(val position: Vector2, val direction: Direction)
-    class Input(val blizzards: List<Blizzard>, val width: Int, val height: Int)
+    class Input(val blizzards: List<Blizzard>, val width: Int, val height: Int) {
+        val start = Vector2(1, 0)
+        val end = Vector2(width - 2, height - 1)
+    }
 
     data class Node(
         val position: Vector2,
+        val goal: Vector2,
         val width: Int,
         val height: Int,
         val blizzards: List<Blizzard>,
     ) : AStar.Node<Node> {
         override val isGoal: Boolean
-            get() = position.x == width - 2 && position.y == height - 1
+            get() = position == goal
 
         override val neighbours: Sequence<AStar.Neighbour<Node>>
             get() = sequence {
@@ -45,7 +49,7 @@ object Day24 : Puzzle<Day24.Input>(24) {
                 // move
                 for (move in Direction.values()) {
                     val nextPosition = position + move.vector
-                    if (nextPosition.x == width - 2 && nextPosition.y == height -1) {
+                    if (nextPosition == goal) {
                         // goal
                     } else if (nextPosition.x !in 1..width - 2 || nextPosition.y !in 1..height - 2) {
                         continue
@@ -53,17 +57,17 @@ object Day24 : Puzzle<Day24.Input>(24) {
                         continue
                     }
 
-                    yield(AStar.Neighbour(Node(nextPosition, width, height, blizzards), 1))
+                    yield(AStar.Neighbour(Node(nextPosition, goal, width, height, blizzards), 1))
                 }
 
                 // wait
                 if (blizzards.none { it.position == position }) {
-                    yield(AStar.Neighbour(Node(position, width, height, blizzards), 1))
+                    yield(AStar.Neighbour(Node(position, goal, width, height, blizzards), 1))
                 }
             }
 
         override val cost: Int
-            get() = abs(position.x - (width - 2)) + abs(position.y - (height - 1))
+            get() = abs(position.x - goal.x) + abs(position.y - goal.y)
     }
 
     private fun nextBlizzards(blizzards: List<Blizzard>, width: Int, height: Int): List<Blizzard> {
@@ -118,8 +122,21 @@ object Day24 : Puzzle<Day24.Input>(24) {
     }
 
     override fun solvePart1(input: Input): Int {
-        val root = Node(Vector2(1, 0), input.width, input.height, input.blizzards)
-        val path = AStar.search(root).firstOrNull() ?: throw UnsolvableException()
+        val path = AStar.search(Node(input.start, input.end, input.width, input.height, input.blizzards))
+            .firstOrNull() ?: throw UnsolvableException()
         return path.distance
+    }
+
+    override fun solvePart2(input: Input): Int {
+        val path1 = AStar.search(Node(input.start, input.end, input.width, input.height, input.blizzards))
+            .firstOrNull() ?: throw UnsolvableException()
+
+        val path2 = AStar.search(Node(input.end, input.start, input.width, input.height, path1.nodes.last().blizzards))
+            .firstOrNull() ?: throw UnsolvableException()
+
+        val path3 = AStar.search(Node(input.start, input.end, input.width, input.height, path2.nodes.last().blizzards))
+            .firstOrNull() ?: throw UnsolvableException()
+
+        return path1.distance + path2.distance + path3.distance
     }
 }
