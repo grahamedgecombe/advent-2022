@@ -62,11 +62,12 @@ object Day23 : Puzzle<Set<Vector2>>(23) {
         return true
     }
 
-    override fun solvePart1(input: Set<Vector2>): Int {
+    private fun simulate(input: Set<Vector2>, stop: (Int, Set<Vector2>, Set<Vector2>) -> Boolean): Pair<Set<Vector2>, Int> {
         var firstDirection = Direction.NORTH
         var elves = input
 
-        for (round in 0 until 10) {
+        var round = 0
+        while (true) {
             // part 1
             val nextElves = mutableSetOf<Vector2>()
             val elfToProposal = mutableMapOf<Vector2, Vector2>()
@@ -107,9 +108,17 @@ object Day23 : Puzzle<Set<Vector2>>(23) {
             }
 
             // prepare for next round
+            if (stop(++round, elves, nextElves)) {
+                return Pair(nextElves, round)
+            }
+
             firstDirection = firstDirection.next()
             elves = nextElves
         }
+    }
+
+    override fun solvePart1(input: Set<Vector2>): Any {
+        val (elves, _) = simulate(input) { round, _, _ -> round == 10 }
 
         val x0 = elves.minOf(Vector2::x)
         val x1 = elves.maxOf(Vector2::x)
@@ -127,5 +136,10 @@ object Day23 : Puzzle<Set<Vector2>>(23) {
         }
 
         return empty
+    }
+
+    override fun solvePart2(input: Set<Vector2>): Int {
+        val (_, round) = simulate(input) { _, a, b -> a == b }
+        return round
     }
 }
